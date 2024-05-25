@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:playbooks_flutter/network/api/playbooks_api.dart';
@@ -25,15 +26,15 @@ class _IndexedPageState extends State<IndexedPage> {
 
   @override
   void initState() {
-    PlaybooksApi(Dio()).getAllCategoriesByDate(kApiKey).then((value) {
-      print(value.toString());
-      PlaybooksApi(Dio())
-          .getBooksByCategoryAndDate(
-              kApiKey, "current", "combined-print-and-e-book-nonfiction")
-          .then((thiss) {
-        print(thiss.toString());
-      });
-    });
+    // PlaybooksApi(Dio()).getAllCategoriesByDate(kApiKey).then((value) {
+    //   print(value.toString());
+    //   PlaybooksApi(Dio())
+    //       .getBooksByCategoryAndDate(
+    //           kApiKey, "current", "combined-print-and-e-book-nonfiction")
+    //       .then((thiss) {
+    //     print(thiss.toString());
+    //   });
+    // });
     super.initState();
   }
 
@@ -106,11 +107,17 @@ class SearchFieldView extends StatelessWidget {
             size: kSP23x,
           ),
           suffixIcon: Container(
-            height: kSP23x,
-            width: kSP23x,
             margin: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-                color: Colors.white, shape: BoxShape.circle),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(kSP40x),
+              child: CachedNetworkImage(
+                height: kSP23x,
+                width: kSP23x,
+                fit: BoxFit.cover,
+                imageUrl:
+                    "https://is1-ssl.mzstatic.com/image/thumb/DoYfxrZ6E9WrFy8TLhOmsQ/1200x675mf.jpg",
+              ),
+            ),
           ),
           prefixIconColor: kTextFieldHintTextColor,
           enabledBorder: OutlineInputBorder(

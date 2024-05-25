@@ -1,10 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:playbooks_flutter/data/bloc/carrousel_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/home_page_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/your_books_and_carrousel_bloc.dart';
+import 'package:playbooks_flutter/data/vos/book_vo.dart';
+import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/pages/book_details_page.dart';
 import 'package:playbooks_flutter/pages/category_details_page.dart';
 import 'package:playbooks_flutter/resources/colors.dart';
 import 'package:playbooks_flutter/resources/dimensions.dart';
 import 'package:playbooks_flutter/resources/strings.dart';
+import 'package:provider/provider.dart';
 
 import 'indexed_page.dart';
 
@@ -13,46 +20,55 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: kBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 50,
+    return ChangeNotifierProvider(
+      create: (_) => HomePageBloc(),
+      child: Scaffold(
+        backgroundColor: kBackgroundColor,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 50,
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: kSP20x,
+                  const SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: kSP20x,
+                    ),
                   ),
-                ),
 
-                /// Carrousel View
-                SliverToBoxAdapter(
-                  child: CarrouselView(),
-                ),
+                  /// Carrousel View
+                  const CarrouselView(),
 
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: kSP20x,
+                  const SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: kSP20x,
+                    ),
                   ),
-                ),
 
-                /// Choose Ebooks and Audio Books section
-                SliverToBoxAdapter(
-                  child: EbooksAndAudiobooksSelectorView(),
-                ),
+                  /// Choose Ebooks and Audio Books section
+                  const SliverToBoxAdapter(
+                    child: EbooksAndAudiobooksSelectorView(),
+                  ),
 
-                /// Category View
-                EbooksView()
-              ],
-            ),
-            SearchFieldView()
-          ],
+                  /// Category View
+                  Selector<HomePageBloc, String>(
+                    builder: (context, selectedText, _) {
+                      if (selectedText == kEbooksLabel) {
+                        return const EbooksView();
+                      }
+                      return const AudioBooksView();
+                    },
+                    selector: (context, bloc) => bloc.selectedText,
+                  )
+                ],
+              ),
+              const SearchFieldView()
+            ],
+          ),
         ),
       ),
     );
@@ -83,86 +99,178 @@ class EbooksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        childCount: 10,
-        (context, index) {
-          return Column(
-            children: [
-              /// Category Title
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CategoryDetailsPage(),
-                      ));
-                },
-                child: const Padding(
-                  padding: EdgeInsets.only(
-                      top: kSP20x, right: kSP16x, left: kSP16x, bottom: kSP16x),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          " Fantasy",
-                          style: TextStyle(
-                              color: kWhiteTextColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: kFontSize18x),
-                        ),
-                      ),
-                      SizedBox(
-                        width: kSP40x,
-                      ),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: kPrimaryColor,
-                      )
-                    ],
-                  ),
-                ),
+    return Selector<HomePageBloc, List<CategoryVO>>(
+        selector: (context, bloc) => bloc.categoryList,
+        builder: (_, categoryList, __) {
+          if (categoryList.isEmpty) {
+            return const SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
+            );
+          }
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              childCount: categoryList.length,
+              (context, index) {
+                final CategoryVO categoryVO = categoryList[index];
+                return Column(
+                  children: [
+                    /// Category Title
+                    CategoryTitleView(categoryVO: categoryVO),
 
-              /// Books List Horizontal Scroll View
-              SizedBox(
-                height: 200,
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(left: kSP16x),
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const BookDetailsPage(),
-                            ));
-                      },
-                      child: Container(
-                          width: 140,
-                          height: 200,
-                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                          decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(kSP10x)),
-                          child: Center(
-                            child: Text(
-                              'text $index',
-                              style: const TextStyle(fontSize: 16.0),
-                            ),
-                          )),
-                    );
-                  },
-                  scrollDirection: Axis.horizontal,
-                ),
-              ),
-            ],
+                    /// Books List Horizontal Scroll View
+                    BooksHorizontalView(
+                      categoryVO: categoryVO,
+                    ),
+                  ],
+                );
+              },
+            ),
           );
-        },
+        });
+  }
+}
+
+class CategoryTitleView extends StatelessWidget {
+  const CategoryTitleView({
+    super.key,
+    required this.categoryVO,
+  });
+
+  final CategoryVO categoryVO;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CategoryDetailsPage(
+                categoryVO: categoryVO,
+              ),
+            ));
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(
+            top: kSP20x, right: kSP16x, left: kSP20x, bottom: kSP16x),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                categoryVO.listName ?? "",
+                style: const TextStyle(
+                    color: kWhiteTextColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: kFontSize18x),
+              ),
+            ),
+            const SizedBox(
+              width: kSP40x,
+            ),
+            const Icon(
+              Icons.arrow_forward,
+              color: kPrimaryColor,
+            )
+          ],
+        ),
       ),
     );
+  }
+}
+
+class BooksHorizontalView extends StatelessWidget {
+  const BooksHorizontalView({
+    super.key,
+    required this.categoryVO,
+  });
+  final CategoryVO categoryVO;
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 280,
+      child: ListView.builder(
+        padding: const EdgeInsets.only(left: kSP16x),
+        itemCount: categoryVO.books!.length,
+        itemBuilder: (context, index) {
+          final BookVO bookVO = categoryVO.books![index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: kSP5x),
+            child: BookItemView(bookVO: bookVO),
+          );
+        },
+        scrollDirection: Axis.horizontal,
+      ),
+    );
+  }
+}
+
+class BookItemView extends StatelessWidget {
+  const BookItemView({
+    super.key,
+    required this.bookVO,
+  });
+
+  final BookVO bookVO;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BookDetailsPage(
+                  bookVO: bookVO,
+                ),
+              ));
+        },
+        child: SizedBox(
+            width: 150,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Book Cover
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(kSP5x),
+                  child: CachedNetworkImage(
+                    fit: BoxFit.cover,
+                    imageUrl: bookVO.bookImage ?? "",
+                    height: 200,
+                    width: double.infinity,
+                  ),
+                ),
+                const SizedBox(
+                  height: kSP10x,
+                ),
+
+                /// Title
+                Text(
+                  bookVO.title ?? "",
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    color: kWhiteTextColor,
+                  ),
+                ),
+                const SizedBox(
+                  height: kSP5x,
+                ),
+
+                // Author
+                Text(
+                  bookVO.author ?? "",
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    color: kGreyTextColor,
+                  ),
+                )
+              ],
+            )));
   }
 }
 
@@ -178,36 +286,37 @@ class EbooksAndAudiobooksSelectorView extends StatefulWidget {
 
 class _EbooksAndAudiobooksSelectorViewState
     extends State<EbooksAndAudiobooksSelectorView> {
-  String selectedLabel = kEbooksLabel;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: kTextFieldFillColor,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          EbookAudiobookButtonView(
-            label: kEbooksLabel,
-            onTapButton: () {
-              setState(() {
-                selectedLabel = kEbooksLabel;
-              });
-            },
-            isSelected: selectedLabel == kEbooksLabel,
+    return Selector<HomePageBloc, String>(
+      selector: (_, bloc) => bloc.selectedText,
+      builder: (_, selectedText, __) {
+        final bloc = context.read<HomePageBloc>();
+        return Container(
+          decoration: const BoxDecoration(
+            color: kTextFieldFillColor,
           ),
-          EbookAudiobookButtonView(
-            label: kAudioBooksLabel,
-            onTapButton: () {
-              setState(() {
-                selectedLabel = kAudioBooksLabel;
-              });
-            },
-            isSelected: selectedLabel == kAudioBooksLabel,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              EbookAudiobookButtonView(
+                label: kEbooksLabel,
+                onTapButton: () {
+                  bloc.onTapEbooksAndAudioBooks(kEbooksLabel);
+                },
+                isSelected: selectedText == kEbooksLabel,
+              ),
+              EbookAudiobookButtonView(
+                label: kAudioBooksLabel,
+                onTapButton: () {
+                  bloc.onTapEbooksAndAudioBooks(kAudioBooksLabel);
+                },
+                isSelected: selectedText == kAudioBooksLabel,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -265,34 +374,55 @@ class CarrouselView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider(
-      carouselController: CarouselController(),
-      options: CarouselOptions(
-        height: kCarouselSliderHeight,
-        aspectRatio: 16 / 9,
-        viewportFraction: 0.5,
-        initialPage: 0,
-        enableInfiniteScroll: true,
-        reverse: false,
-        autoPlayCurve: Curves.fastOutSlowIn,
-        enlargeCenterPage: true,
-        enlargeFactor: 0.22,
-        scrollDirection: Axis.horizontal,
-      ),
-      items: [1, 2, 3, 4, 5].map((i) {
-        return Container(
-            width: MediaQuery.of(context).size.width,
-            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-            decoration: BoxDecoration(
-                color: Colors.amber,
-                borderRadius: BorderRadius.circular(kSP10x)),
-            child: Center(
-              child: Text(
-                'text $i',
-                style: const TextStyle(fontSize: 16.0),
+    return ChangeNotifierProvider(
+      create: (context) => CarrouselBloc(),
+      child: Selector<CarrouselBloc, List<BookVO>>(
+        selector: (context, bloc) => bloc.bookList,
+        builder: (context, bookList, _) {
+          if (bookList.isNotEmpty) {
+            return SliverToBoxAdapter(
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  height: kCarouselSliderHeight,
+                  aspectRatio: 16 / 9,
+                  viewportFraction: 0.5,
+                  initialPage: 0,
+                  enableInfiniteScroll: true,
+                  reverse: false,
+                  autoPlayCurve: Curves.fastOutSlowIn,
+                  enlargeCenterPage: true,
+                  enlargeFactor: 0.22,
+                  scrollDirection: Axis.horizontal,
+                ),
+                items: bookList.map((book) {
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookDetailsPage(
+                              bookVO: book,
+                            ),
+                          ));
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(kSP8x),
+                          child: CachedNetworkImage(
+                            imageUrl: book.bookImage ?? "",
+                            fit: BoxFit.cover,
+                          ),
+                        )),
+                  );
+                }).toList(),
               ),
-            ));
-      }).toList(),
+            );
+          }
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        },
+      ),
     );
   }
 }

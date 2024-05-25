@@ -1,9 +1,25 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:playbooks_flutter/data/model/playbooks_model.dart';
+import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/resources/colors.dart';
 import 'package:playbooks_flutter/resources/dimensions.dart';
 
-class BookDetailsPage extends StatelessWidget {
-  const BookDetailsPage({super.key});
+class BookDetailsPage extends StatefulWidget {
+  const BookDetailsPage({super.key, required this.bookVO});
+
+  final BookVO bookVO;
+
+  @override
+  State<BookDetailsPage> createState() => _BookDetailsPageState();
+}
+
+class _BookDetailsPageState extends State<BookDetailsPage> {
+  @override
+  void initState() {
+    PlaybooksModel().addBookToDatabase(widget.bookVO);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,38 +36,40 @@ class BookDetailsPage extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: 150,
-                  width: 100,
-                  decoration: BoxDecoration(
-                      color: Colors.yellow,
-                      borderRadius: BorderRadius.circular(kSP8x)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(kSP8x),
+                  child: CachedNetworkImage(
+                    height: 220,
+                    width: 150,
+                    fit: BoxFit.cover,
+                    imageUrl: widget.bookVO.bookImage ?? "",
+                  ),
                 ),
                 const SizedBox(
                   width: kSP12x,
                 ),
-                const Flexible(
+                Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Google Play Books & Audiobooks",
+                        widget.bookVO.title ?? "",
                         maxLines: 3,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: kFontSize18x,
                         ),
                       ),
                       Text(
-                        "Martha Wells",
-                        style: TextStyle(
+                        widget.bookVO.author ?? "",
+                        style: const TextStyle(
                             color: kSecondaryColor,
                             fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        "Ebook",
-                        style: TextStyle(
+                        widget.bookVO.publisher ?? "",
+                        style: const TextStyle(
                             color: kWhiteTextColor,
                             fontWeight: FontWeight.w500),
                       ),
@@ -135,46 +153,35 @@ class BookDetailsPage extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: kSP12x),
               child: Divider(),
             ),
-            InkWell(
-              onTap: () {
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) => const CategoryDetailsPage(),
-                //     ));
-              },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      "About this ebook",
-                      style: TextStyle(
-                          color: kWhiteTextColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: kFontSize18x),
-                    ),
-                  ),
-                  SizedBox(
-                    width: kSP40x,
-                  ),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: kPrimaryColor,
-                  )
-                ],
+            ExpansionTile(
+              shape: const Border(),
+              title: const Text(
+                "About this ebook",
+                style: TextStyle(
+                  color: kWhiteTextColor,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+              subtitle: Text(
+                widget.bookVO.description ?? "",
+                maxLines: 1,
+                style: const TextStyle(
+                  color: kWhiteTextColor,
+                  fontSize: kFontSize14x,
+                ),
+              ),
+              children: [
+                Text(
+                  widget.bookVO.description ?? "",
+                  style: const TextStyle(
+                    color: kWhiteTextColor,
+                    fontSize: kFontSize14x,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(
               height: kSP10x,
-            ),
-            const Text(
-              "Jack Audley has been a highwayman.A soldier. And he has always been a rogue. What he is not, and never wanted to be, is a peer of the realm, responsible for an ancient heritage and the livelihood of hundreds. But when he is recognized as the long-lost son of the House of Wyndham, his carefree life is over.",
-              maxLines: 5,
-              style: TextStyle(
-                color: kWhiteTextColor,
-                fontSize: kFontSize14x,
-              ),
             ),
           ],
         ),

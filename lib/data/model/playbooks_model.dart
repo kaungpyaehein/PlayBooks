@@ -1,4 +1,5 @@
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
+import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/network/data_agents/playbooks_data_agent.dart';
 import 'package:playbooks_flutter/network/data_agents/retrofit_data_agent_impl.dart';
 import 'package:playbooks_flutter/persistence/dao/books_dao.dart';
@@ -22,9 +23,24 @@ class PlaybooksModel {
     return _playbooksDataAgent
         .getBooksByCategoryAndDate(category, date)
         .then((books) {
-      /// save books to local
-      _booksDao.saveBooks(books);
       return books;
     });
+  }
+
+  Future<List<CategoryVO>> getAllCategories() {
+    return _playbooksDataAgent.getAllCategories();
+  }
+
+  /// Get Books Stream from Local database
+  Stream<List<BookVO>> getBooksFromDatabaseStream() {
+    return _booksDao.watchBookBox().map((_) => _booksDao.getAllBooks());
+  }
+
+  void addBookToDatabase(BookVO bookVO) {
+    _booksDao.saveSingleBook(bookVO);
+  }
+
+  List<BookVO> geAllBooks() {
+    return _booksDao.getAllBooks();
   }
 }

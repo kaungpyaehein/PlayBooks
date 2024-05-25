@@ -1,7 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:playbooks_flutter/data/bloc/your_books_and_carrousel_bloc.dart';
+import 'package:playbooks_flutter/data/vos/book_vo.dart';
+import 'package:playbooks_flutter/pages/home_page.dart';
 import 'package:playbooks_flutter/pages/indexed_page.dart';
 import 'package:playbooks_flutter/resources/colors.dart';
 import 'package:playbooks_flutter/resources/dimensions.dart';
+import 'package:playbooks_flutter/resources/enums.dart';
+import 'package:playbooks_flutter/resources/strings.dart';
+import 'package:provider/provider.dart';
 
 class LibraryPage extends StatelessWidget {
   const LibraryPage({super.key});
@@ -86,8 +94,8 @@ class YourShelfView extends StatelessWidget {
             backgroundColor: kSecondaryColor,
             label: const Text(
               "Create New",
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
             isExtended: true,
             onPressed: () {},
@@ -107,20 +115,39 @@ class YourBooksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CustomScrollView(
+    return CustomScrollView(
       slivers: [
-        /// CategoryList to chosse
-        CategoryList(),
+        /// CategoryList to choose
+        const CategoryList(),
 
         /// Sort bya and Change Grid or List View
-        SortingAndLayoutChangeView(),
+        const SortingAndLayoutChangeView(),
 
         /// Books View
         SliverPadding(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: kSP16x,
           ),
-          sliver: BooksListView(),
+          sliver: Consumer<YourBooksAndCarrouselBloc>(
+            builder: (context, bloc, child) {
+              if (bloc.selectedView == kViewList) {
+                return BooksListView(
+                  bookList: bloc.bookList,
+                );
+              } else if (bloc.selectedView == kViewLargeGrid) {
+                return BooksLargeGridView(
+                  bookList: bloc.bookList,
+                );
+              } else if (bloc.selectedView == kViewSmallGrid) {
+                return BooksSmallGridView(
+                  bookList: bloc.bookList,
+                );
+              }
+              return BooksListView(
+                bookList: bloc.bookList,
+              );
+            },
+          ),
         )
       ],
     );
@@ -198,26 +225,33 @@ class CategoryList extends StatelessWidget {
 }
 
 class BooksListView extends StatelessWidget {
-  const BooksListView({super.key});
+  const BooksListView({super.key, required this.bookList});
 
+  final List<BookVO> bookList;
   @override
   Widget build(BuildContext context) {
     return SliverList(
-        delegate: SliverChildBuilderDelegate(childCount: 100, (context, index) {
+        delegate: SliverChildBuilderDelegate(childCount: bookList.length,
+            (context, index) {
+      final BookVO bookVO = bookList[index];
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: Container(
-          height: 100,
-          width: 50,
-          decoration: const BoxDecoration(color: Colors.yellow),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(kSP5x),
+          child: CachedNetworkImage(
+            fit: BoxFit.cover,
+            height: 100,
+            width: 50,
+            imageUrl: bookVO.bookImage ?? "",
+          ),
         ),
-        title: const Text(
-          "Book Name",
-          style: TextStyle(color: kWhiteTextColor),
+        title: Text(
+          bookVO.title ?? "",
+          style: const TextStyle(color: kWhiteTextColor),
         ),
-        subtitle: const Text(
-          "this is subtitle",
-          style: TextStyle(color: kGreyTextColor),
+        subtitle: Text(
+          bookVO.author ?? "",
+          style: const TextStyle(color: kGreyTextColor),
         ),
         trailing: const Icon(
           Icons.download,
@@ -228,34 +262,55 @@ class BooksListView extends StatelessWidget {
   }
 }
 
-class BookGridView extends StatelessWidget {
-  const BookGridView({
+class BooksLargeGridView extends StatelessWidget {
+  const BooksLargeGridView({
     super.key,
+    required this.bookList,
   });
-
+  final List<BookVO> bookList;
   @override
   Widget build(BuildContext context) {
     return SliverGrid(
       delegate: SliverChildBuilderDelegate(
-        childCount: 100,
+        childCount: bookList.length,
         (context, index) {
-
-          return Container(
-            color: Colors.blueGrey,
-            child: Center(
-              child: Text(
-                'Book $index',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
+          return BookItemView(
+            bookVO: bookList[index],
           );
         },
       ),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
+        mainAxisExtent: 260,
+        crossAxisSpacing: kSP10x,
+        mainAxisSpacing: kSP12x,
+      ),
+    );
+  }
+}
+
+class BooksSmallGridView extends StatelessWidget {
+  const BooksSmallGridView({
+    super.key,
+    required this.bookList,
+  });
+  final List<BookVO> bookList;
+  @override
+  Widget build(BuildContext context) {
+    return SliverGrid(
+      delegate: SliverChildBuilderDelegate(
+        childCount: bookList.length,
+        (context, index) {
+          return BookItemView(
+            bookVO: bookList[index],
+          );
+        },
+      ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisExtent: 260,
+        crossAxisSpacing: kSP10x,
+        mainAxisSpacing: kSP12x,
       ),
     );
   }
@@ -268,29 +323,221 @@ class SortingAndLayoutChangeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SliverToBoxAdapter(
+    return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: kSP16x, vertical: kSP10x),
+        padding:
+            const EdgeInsets.symmetric(horizontal: kSP16x, vertical: kSP10x),
         child: Row(
           children: [
-            Icon(
-              Icons.sort,
-              color: kWhiteTextColor,
+            InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(kSP10x)),
+                  context: context,
+                  builder: (context) => const SortingBottomSheetView(),
+                );
+              },
+              child: const Icon(
+                Icons.sort,
+                color: kWhiteTextColor,
+              ),
             ),
-            SizedBox(
+            const SizedBox(
               width: kSP10x,
             ),
-            Text(
-              "Sort By",
-              style: TextStyle(
-                  color: kWhiteTextColor, fontWeight: FontWeight.w500),
+            Selector<YourBooksAndCarrouselBloc, String>(
+              builder: (context, sortingStatus, child) {
+                return Text(
+                  "Sort By $sortingStatus",
+                  style: const TextStyle(
+                      color: kWhiteTextColor, fontWeight: FontWeight.w500),
+                );
+              },
+              selector: (context, bloc) => bloc.selectedSortingStatus,
             ),
-            Spacer(),
-            Icon(
-              Icons.view_list_outlined,
-              color: kWhiteTextColor,
-            )
+            const Spacer(),
+            Selector<YourBooksAndCarrouselBloc, String>(
+              selector: (context, bloc) => bloc.selectedView,
+              builder: (context, selectedView, child) => InkWell(
+                onTap: () {
+                  showModalBottomSheet(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(kSP10x)),
+                    context: context,
+                    builder: (context) => const ViewSelectBottomSheetView(),
+                  );
+                },
+                child: _buildIcon(selectedView),
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+Widget _buildIcon(String selectedView) {
+  switch (selectedView) {
+    case kViewList:
+      return const Icon(
+        Icons.view_list_outlined,
+        color: kWhiteTextColor,
+      );
+    case kViewLargeGrid:
+      return const Icon(
+        Icons.grid_view,
+        color: kWhiteTextColor,
+      );
+    case kViewSmallGrid:
+      return const Icon(
+        Icons.grid_on_sharp,
+        color: kWhiteTextColor,
+      );
+    default:
+      return const Icon(
+        Icons.error_outline,
+        color: kWhiteTextColor,
+      );
+  }
+}
+
+class SortingBottomSheetView extends StatelessWidget {
+  const SortingBottomSheetView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> sortingList = [kSortingRecent, kSortingAuthor, kSortingTitle];
+    return Builder(builder: (context) {
+      return FractionallySizedBox(
+        heightFactor: 0.5,
+        child: Selector<YourBooksAndCarrouselBloc, String>(
+          selector: (context, bloc) => bloc.selectedSortingStatus,
+          builder: (context, selectedSortingStatus, _) => Padding(
+            padding: const EdgeInsets.all(kSP16x),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: kSP10x),
+                  child: Text(
+                    "Sort",
+                    style: TextStyle(
+                        color: kWhiteTextColor,
+                        fontSize: kFontSize20x,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const Divider(),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: sortingList.length,
+                  itemBuilder: (context, index) {
+                    final String sortingStatus = sortingList[index];
+                    return InkWell(
+                      onTap: () {
+                        final bloc = context.read<YourBooksAndCarrouselBloc>();
+                        bloc.sortBookBySortingStatus(sortingStatus);
+                        Navigator.pop(context);
+                      },
+                      child: Row(
+                        children: [
+                          Radio(
+                            visualDensity: VisualDensity.compact,
+                            groupValue: sortingStatus,
+                            value: selectedSortingStatus,
+                            onChanged: (Object? value) {
+                              final bloc =
+                                  context.read<YourBooksAndCarrouselBloc>();
+                              bloc.sortBookBySortingStatus(sortingStatus);
+                              Navigator.pop(context);
+                            },
+                          ),
+                          Text(
+                            "Sort by $sortingStatus",
+                            style: const TextStyle(fontSize: kFontSize14x),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class ViewSelectBottomSheetView extends StatelessWidget {
+  const ViewSelectBottomSheetView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> viewOptions = [kViewList, kViewSmallGrid, kViewLargeGrid];
+
+    return FractionallySizedBox(
+      heightFactor: 0.5,
+      child: Selector<YourBooksAndCarrouselBloc, String>(
+        selector: (context, bloc) => bloc.selectedView,
+        builder: (context, selectedView, _) => Padding(
+          padding: const EdgeInsets.all(kSP16x),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(left: kSP10x),
+                child: Text(
+                  "View as",
+                  style: TextStyle(
+                      color: kWhiteTextColor,
+                      fontSize: kFontSize20x,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              const Divider(),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: viewOptions.length,
+                itemBuilder: (context, index) {
+                  final String view = viewOptions[index];
+                  return InkWell(
+                    onTap: () {
+                      final bloc = context.read<YourBooksAndCarrouselBloc>();
+                      bloc.changeView(view);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Radio(
+                          visualDensity: VisualDensity.compact,
+                          groupValue: selectedView,
+                          value: view,
+                          onChanged: (Object? value) {
+                            final bloc =
+                                context.read<YourBooksAndCarrouselBloc>();
+                            bloc.changeView(view);
+                            Navigator.pop(context);
+                          },
+                        ),
+                        Text(
+                          view,
+                          style: const TextStyle(fontSize: kFontSize14x),
+                        )
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
