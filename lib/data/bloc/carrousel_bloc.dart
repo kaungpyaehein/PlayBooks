@@ -15,9 +15,9 @@ class CarrouselBloc extends ChangeNotifier {
     _myCarrouselBooksSubscription =
         _model.getBooksFromDatabaseStream().listen((booksFromDatabase) {
       bookList = booksFromDatabase;
-
+      notifyListeners();
     });
-    bookList = _model.geAllBooks();
+    bookList = _model.getAllBooks();
     notifyListeners();
   }
   @override

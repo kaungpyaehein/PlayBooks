@@ -1,10 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:playbooks_flutter/data/bloc/your_books_and_carrousel_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/create_new_shelf_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/shelf_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/your_books_bloc.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
+import 'package:playbooks_flutter/data/vos/shelf_vo.dart';
+import 'package:playbooks_flutter/pages/book_details_page.dart';
+import 'package:playbooks_flutter/pages/create_new_shelf_page.dart';
 import 'package:playbooks_flutter/pages/home_page.dart';
 import 'package:playbooks_flutter/pages/indexed_page.dart';
+import 'package:playbooks_flutter/pages/your_shelf_view.dart';
 import 'package:playbooks_flutter/resources/colors.dart';
 import 'package:playbooks_flutter/resources/dimensions.dart';
 import 'package:playbooks_flutter/resources/enums.dart';
@@ -56,60 +64,6 @@ class LibraryPage extends StatelessWidget {
   }
 }
 
-class YourShelfView extends StatelessWidget {
-  const YourShelfView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ListView.builder(
-          itemCount: 10,
-          itemBuilder: (context, index) {
-            return ListTile(
-              leading: Container(
-                height: 100,
-                width: 50,
-                decoration: const BoxDecoration(color: Colors.yellow),
-              ),
-              title: const Text(
-                "Book Name",
-                style: TextStyle(color: kWhiteTextColor),
-              ),
-              subtitle: const Text(
-                "this is subtitle",
-                style: TextStyle(color: kGreyTextColor),
-              ),
-              trailing: const Icon(
-                Icons.download,
-                color: kPrimaryColor,
-              ),
-            );
-          },
-        ),
-        Positioned(
-          bottom: kSP16x,
-          right: kSP16x,
-          child: FloatingActionButton.extended(
-            backgroundColor: kSecondaryColor,
-            label: const Text(
-              "Create New",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            isExtended: true,
-            onPressed: () {},
-            icon: const Icon(
-              Icons.edit,
-              color: Colors.white,
-            ),
-          ),
-        )
-      ],
-    );
-  }
-}
-
 class YourBooksView extends StatelessWidget {
   const YourBooksView({super.key});
 
@@ -128,7 +82,7 @@ class YourBooksView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             horizontal: kSP16x,
           ),
-          sliver: Consumer<YourBooksAndCarrouselBloc>(
+          sliver: Consumer<YourBooksBloc>(
             builder: (context, bloc, child) {
               if (bloc.selectedView == kViewList) {
                 return BooksListView(
@@ -234,32 +188,145 @@ class BooksListView extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(childCount: bookList.length,
             (context, index) {
       final BookVO bookVO = bookList[index];
-      return ListTile(
-        contentPadding: EdgeInsets.zero,
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(kSP5x),
-          child: CachedNetworkImage(
-            fit: BoxFit.cover,
-            height: 100,
-            width: 50,
-            imageUrl: bookVO.bookImage ?? "",
+      return InkWell(
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => BookDetailsPage(bookVO: bookVO),
+        )),
+        onLongPress: () {
+          showAddToShelfBottomShelf(context, bookVO);
+        },
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(kSP5x),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              height: 100,
+              width: 50,
+              imageUrl: bookVO.bookImage ?? "",
+            ),
           ),
-        ),
-        title: Text(
-          bookVO.title ?? "",
-          style: const TextStyle(color: kWhiteTextColor),
-        ),
-        subtitle: Text(
-          bookVO.author ?? "",
-          style: const TextStyle(color: kGreyTextColor),
-        ),
-        trailing: const Icon(
-          Icons.download,
-          color: kPrimaryColor,
+          title: Text(
+            bookVO.title ?? "",
+            style: const TextStyle(color: kWhiteTextColor),
+          ),
+          subtitle: Text(
+            bookVO.author ?? "",
+            style: const TextStyle(color: kGreyTextColor),
+          ),
+          trailing: const Icon(
+            Icons.download,
+            color: kPrimaryColor,
+          ),
         ),
       );
     }));
   }
+}
+
+Future<dynamic> showAddToShelfBottomShelf(BuildContext context, BookVO bookVO) {
+  return showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(kSP10x)),
+    ),
+    backgroundColor: kBackgroundColor, // Adjust background color if needed
+    builder: (context) {
+      return Selector<ShelfBloc, List<ShelfVO>>(
+        selector: (context, bloc) => bloc.shelfList,
+        builder: (context, shelfList, _) {
+          return Padding(
+            padding: const EdgeInsets.all(kSP16x),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: kSP10x),
+                  child: Text(
+                    "Add to shelf",
+                    style: TextStyle(
+                      color: kWhiteTextColor,
+                      fontSize: kFontSize20x,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Divider(),
+                shelfList.isEmpty
+                    ? Expanded(
+                        child: Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    const CreateNewShelfPage(),
+                              ));
+                            },
+                            child: const Text("Create New Shelf"),
+                          ),
+                        ),
+                      )
+                    : Flexible(
+                        child: DraggableScrollableSheet(
+                          initialChildSize: 1, // Adjust initial height
+                          minChildSize: 1, // Adjust minimum height
+                          maxChildSize: 1, // Adjust maximum height
+                          builder: (context, scrollController) {
+                            return ListView.builder(
+                              controller: scrollController,
+                              itemCount: shelfList.length,
+                              itemBuilder: (context, index) {
+                                final ShelfVO shelf = shelfList[index];
+                                return ListTile(
+                                  leading: shelf.bookList!.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            kSP10x,
+                                          ),
+                                          child: CachedNetworkImage(
+                                            height: 100,
+                                            width: 50,
+                                            fit: BoxFit.cover,
+                                            imageUrl: shelf.bookList!.first
+                                                    .bookImage ??
+                                                "",
+                                          ),
+                                        )
+                                      : Container(
+                                          height: 50,
+                                          width: 50,
+                                          color: kPrimaryColor,
+                                        ),
+                                  title: Text(
+                                    shelf.shelfName ?? "",
+                                    style:
+                                        const TextStyle(color: kWhiteTextColor),
+                                  ),
+                                  subtitle: Text(
+                                    "${shelf.bookList!.length.toString()} books",
+                                    style:
+                                        const TextStyle(color: kGreyTextColor),
+                                  ),
+                                  onTap: () {
+                                    context
+                                        .read<ShelfBloc>()
+                                        .addNewBookToShelf(bookVO, shelf);
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }
 
 class BooksLargeGridView extends StatelessWidget {
@@ -274,8 +341,13 @@ class BooksLargeGridView extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         childCount: bookList.length,
         (context, index) {
-          return BookItemView(
-            bookVO: bookList[index],
+          return InkWell(
+            onLongPress: () {
+              showAddToShelfBottomShelf(context, bookList[index]);
+            },
+            child: BookItemView(
+              bookVO: bookList[index],
+            ),
           );
         },
       ),
@@ -301,8 +373,13 @@ class BooksSmallGridView extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         childCount: bookList.length,
         (context, index) {
-          return BookItemView(
-            bookVO: bookList[index],
+          return InkWell(
+            onLongPress: () {
+              showAddToShelfBottomShelf(context, bookList[index]);
+            },
+            child: BookItemView(
+              bookVO: bookList[index],
+            ),
           );
         },
       ),
@@ -346,7 +423,7 @@ class SortingAndLayoutChangeView extends StatelessWidget {
             const SizedBox(
               width: kSP10x,
             ),
-            Selector<YourBooksAndCarrouselBloc, String>(
+            Selector<YourBooksBloc, String>(
               builder: (context, sortingStatus, child) {
                 return Text(
                   "Sort By $sortingStatus",
@@ -357,7 +434,7 @@ class SortingAndLayoutChangeView extends StatelessWidget {
               selector: (context, bloc) => bloc.selectedSortingStatus,
             ),
             const Spacer(),
-            Selector<YourBooksAndCarrouselBloc, String>(
+            Selector<YourBooksBloc, String>(
               selector: (context, bloc) => bloc.selectedView,
               builder: (context, selectedView, child) => InkWell(
                 onTap: () {
@@ -368,7 +445,7 @@ class SortingAndLayoutChangeView extends StatelessWidget {
                     builder: (context) => const ViewSelectBottomSheetView(),
                   );
                 },
-                child: _buildIcon(selectedView),
+                child: buildIcon(selectedView),
               ),
             ),
           ],
@@ -378,7 +455,7 @@ class SortingAndLayoutChangeView extends StatelessWidget {
   }
 }
 
-Widget _buildIcon(String selectedView) {
+Widget buildIcon(String selectedView) {
   switch (selectedView) {
     case kViewList:
       return const Icon(
@@ -411,66 +488,63 @@ class SortingBottomSheetView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<String> sortingList = [kSortingRecent, kSortingAuthor, kSortingTitle];
-    return Builder(builder: (context) {
-      return FractionallySizedBox(
-        heightFactor: 0.5,
-        child: Selector<YourBooksAndCarrouselBloc, String>(
-          selector: (context, bloc) => bloc.selectedSortingStatus,
-          builder: (context, selectedSortingStatus, _) => Padding(
-            padding: const EdgeInsets.all(kSP16x),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(left: kSP10x),
-                  child: Text(
-                    "Sort",
-                    style: TextStyle(
-                        color: kWhiteTextColor,
-                        fontSize: kFontSize20x,
-                        fontWeight: FontWeight.w600),
-                  ),
+    return FractionallySizedBox(
+      heightFactor: 0.5,
+      child: Selector<YourBooksBloc, String>(
+        selector: (context, bloc) => bloc.selectedSortingStatus,
+        builder: (context, selectedSortingStatus, _) => Padding(
+          padding: const EdgeInsets.all(kSP16x),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(left: kSP10x),
+                child: Text(
+                  "Sort",
+                  style: TextStyle(
+                      color: kWhiteTextColor,
+                      fontSize: kFontSize20x,
+                      fontWeight: FontWeight.w600),
                 ),
-                const Divider(),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: sortingList.length,
-                  itemBuilder: (context, index) {
-                    final String sortingStatus = sortingList[index];
-                    return InkWell(
-                      onTap: () {
-                        final bloc = context.read<YourBooksAndCarrouselBloc>();
-                        bloc.sortBookBySortingStatus(sortingStatus);
-                        Navigator.pop(context);
-                      },
-                      child: Row(
-                        children: [
-                          Radio(
-                            visualDensity: VisualDensity.compact,
-                            groupValue: sortingStatus,
-                            value: selectedSortingStatus,
-                            onChanged: (Object? value) {
-                              final bloc =
-                                  context.read<YourBooksAndCarrouselBloc>();
-                              bloc.sortBookBySortingStatus(sortingStatus);
-                              Navigator.pop(context);
-                            },
-                          ),
-                          Text(
-                            "Sort by $sortingStatus",
-                            style: const TextStyle(fontSize: kFontSize14x),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+              ),
+              const Divider(),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: sortingList.length,
+                itemBuilder: (context, index) {
+                  final String sortingStatus = sortingList[index];
+                  return InkWell(
+                    onTap: () {
+                      final bloc = context.read<YourBooksBloc>();
+                      bloc.sortBookBySortingStatus(sortingStatus);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Radio(
+                          visualDensity: VisualDensity.compact,
+                          groupValue: sortingStatus,
+                          value: selectedSortingStatus,
+                          onChanged: (Object? value) {
+                            final bloc = context.read<YourBooksBloc>();
+                            bloc.sortBookBySortingStatus(sortingStatus);
+                            Navigator.pop(context);
+                          },
+                        ),
+                        Text(
+                          "Sort by $sortingStatus",
+                          style: const TextStyle(fontSize: kFontSize14x),
+                        )
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
@@ -481,11 +555,9 @@ class ViewSelectBottomSheetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> viewOptions = [kViewList, kViewSmallGrid, kViewLargeGrid];
-
     return FractionallySizedBox(
       heightFactor: 0.5,
-      child: Selector<YourBooksAndCarrouselBloc, String>(
+      child: Selector<YourBooksBloc, String>(
         selector: (context, bloc) => bloc.selectedView,
         builder: (context, selectedView, _) => Padding(
           padding: const EdgeInsets.all(kSP16x),
@@ -510,7 +582,7 @@ class ViewSelectBottomSheetView extends StatelessWidget {
                   final String view = viewOptions[index];
                   return InkWell(
                     onTap: () {
-                      final bloc = context.read<YourBooksAndCarrouselBloc>();
+                      final bloc = context.read<YourBooksBloc>();
                       bloc.changeView(view);
                       Navigator.pop(context);
                     },
@@ -521,8 +593,7 @@ class ViewSelectBottomSheetView extends StatelessWidget {
                           groupValue: selectedView,
                           value: view,
                           onChanged: (Object? value) {
-                            final bloc =
-                                context.read<YourBooksAndCarrouselBloc>();
+                            final bloc = context.read<YourBooksBloc>();
                             bloc.changeView(view);
                             Navigator.pop(context);
                           },

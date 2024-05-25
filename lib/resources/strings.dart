@@ -10,3 +10,5 @@ const String kSortingAuthor = "Author";
 const String kViewList = "List view";
 const String kViewSmallGrid = "Small grid view";
 const String kViewLargeGrid = "Large grid view";
+List<String> sortingList = [kSortingRecent, kSortingAuthor, kSortingTitle];
+List<String> viewOptions = [kViewList, kViewSmallGrid, kViewLargeGrid];

@@ -3,7 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:playbooks_flutter/data/bloc/carrousel_bloc.dart';
 import 'package:playbooks_flutter/data/bloc/home_page_bloc.dart';
-import 'package:playbooks_flutter/data/bloc/your_books_and_carrousel_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/your_books_bloc.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/pages/book_details_page.dart';
