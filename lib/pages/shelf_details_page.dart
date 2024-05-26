@@ -16,13 +16,18 @@ class ShelfDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => ShelfDetailsBloc(shelfVO),
-      child: Consumer<ShelfDetailsBloc>(
-        builder: (context, bloc, child) {
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: kBackgroundColor,
-            ),
-            body: CustomScrollView(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: kBackgroundColor,
+        ),
+        body: Consumer<ShelfDetailsBloc>(
+          builder: (context, bloc, child) {
+            if (bloc.bookList.isEmpty ) {
+              return const Center(
+                child: Text("Empty Shelf"),
+              );
+            }
+            return CustomScrollView(
               slivers: [
                 /// Edit Shelf Name View
                 SliverToBoxAdapter(
@@ -32,7 +37,15 @@ class ShelfDetailsView extends StatelessWidget {
                 ),
 
                 /// CategoryList to choose
-                const CategoryList(),
+                Consumer<ShelfDetailsBloc>(builder: (context, bloc, _) {
+                  return CategoryList(
+                    selectedCategory: bloc.selectedCategory,
+                    onTapCategory: (category) {
+                      bloc.selectCategory(category);
+                    },
+                    categoryList: bloc.categories,
+                  );
+                }),
 
                 /// Sort bya and Change Grid or List View
                 const SortingAndLayoutChangeViewShelf(),
@@ -66,9 +79,9 @@ class ShelfDetailsView extends StatelessWidget {
                   ),
                 )
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

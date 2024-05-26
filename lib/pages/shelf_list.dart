@@ -21,69 +21,72 @@ class ShelfListView extends StatelessWidget {
           Selector<ShelfBloc, List<ShelfVO>>(
               selector: (context, bloc) => bloc.shelfList,
               builder: (context, shelfList, _) {
-                return ListView.separated(
-                  separatorBuilder: (context, index) {
-                    return const Divider(
-                      height: 0,
-                    );
-                  },
-                  itemCount: shelfList.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ShelfDetailsView(
-                                shelfVO: shelfList[index],
-                              ),
-                            ));
-                      },
-                      onLongPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CreateNewShelfPage(
-                                shelfVO: shelfList[index],
-                              ),
-                            ));
-                      },
-                      leading: shelfList[index].bookList!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                kSP10x,
-                              ),
-                              child: CachedNetworkImage(
-                                height: 100,
-                                fit: BoxFit.cover,
+                if (shelfList.isNotEmpty) {
+                  return ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return const Divider(
+                        height: 0,
+                      );
+                    },
+                    itemCount: shelfList.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ShelfDetailsView(
+                                  shelfVO: shelfList[index],
+                                ),
+                              ));
+                        },
+                        onLongPress: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateNewShelfPage(
+                                  shelfVO: shelfList[index],
+                                ),
+                              ));
+                        },
+                        leading: shelfList[index].bookList!.isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  kSP10x,
+                                ),
+                                child: CachedNetworkImage(
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  width: 50,
+                                  imageUrl: shelfList[index]
+                                          .bookList
+                                          ?.first
+                                          .bookImage ??
+                                      "",
+                                ),
+                              )
+                            : Container(
+                                height: 50,
                                 width: 50,
-                                imageUrl: shelfList[index]
-                                        .bookList
-                                        ?.first
-                                        .bookImage ??
-                                    "",
+                                color: kPrimaryColor,
                               ),
-                            )
-                          : Container(
-                              height: 50,
-                              width: 50,
-                              color: kPrimaryColor,
-                            ),
-                      title: Text(
-                        shelfList[index].shelfName ?? "",
-                        style: const TextStyle(color: kWhiteTextColor),
-                      ),
-                      subtitle: Text(
-                        "${shelfList[index].bookList!.length.toString()} books",
-                        style: const TextStyle(color: kGreyTextColor),
-                      ),
-                      trailing: const Icon(
-                        Icons.arrow_forward,
-                        color: kPrimaryColor,
-                      ),
-                    );
-                  },
-                );
+                        title: Text(
+                          shelfList[index].shelfName ?? "",
+                          style: const TextStyle(color: kWhiteTextColor),
+                        ),
+                        subtitle: Text(
+                          "${shelfList[index].bookList!.length.toString()} books",
+                          style: const TextStyle(color: kGreyTextColor),
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_forward,
+                          color: kPrimaryColor,
+                        ),
+                      );
+                    },
+                  );
+                }
+                return Center(child: Text("Empty Shelf"),);
               }),
           Positioned(
             bottom: kSP16x,

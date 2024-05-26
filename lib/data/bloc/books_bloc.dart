@@ -15,7 +15,6 @@ class BooksBloc extends ChangeNotifier {
 
   StreamSubscription? _myBooksSubscription;
 
-  List<String> categoryList = [];
 
   late String selectedSortingStatus;
   late String selectedView;

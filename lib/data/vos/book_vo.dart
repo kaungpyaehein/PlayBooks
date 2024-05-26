@@ -150,4 +150,17 @@ class BookVO {
   factory BookVO.fromJson(Map<String, dynamic> json) => _$BookVOFromJson(json);
 
   Map<String, dynamic> toJson() => _$BookVOToJson(this);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is BookVO &&
+        other.primaryIsbn13 == primaryIsbn13 &&
+        other.title == title &&
+        other.author == author;
+  }
+
+  @override
+  int get hashCode => primaryIsbn13.hashCode ^ title.hashCode ^ author.hashCode;
 }

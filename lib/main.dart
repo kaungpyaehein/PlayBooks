@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:playbooks_flutter/data/bloc/create_new_shelf_bloc.dart';
 import 'package:playbooks_flutter/data/bloc/shelf_bloc.dart';
 import 'package:playbooks_flutter/data/bloc/books_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/shelf_details_bloc.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/data/vos/buy_link_vo.dart';
 import 'package:playbooks_flutter/data/vos/isbn_vo.dart';
@@ -36,8 +37,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // ChangeNotifierProvider<BooksBloc>(
+        //     create: (_) => BooksBloc()),
+        ChangeNotifierProvider<ShelfBloc>(create: (_) => ShelfBloc()),
         ChangeNotifierProvider<CreateNewShelfBloc>(
             create: (_) => CreateNewShelfBloc()),
+
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

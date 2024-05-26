@@ -8,13 +8,24 @@ class ShelfDetailsBloc extends ChangeNotifier {
   final PlaybooksModel _model = PlaybooksModel();
   List<BookVO> bookList = [];
 
+  List<BookVO> allBooks = [];
+
+  List<String> categories = [];
+
   late String selectedSortingStatus;
   late String selectedView;
+  late String selectedCategory;
 
   ShelfDetailsBloc(ShelfVO shelfVO) {
     selectedSortingStatus = kSortingRecent;
     selectedView = kViewSmallGrid;
     bookList = shelfVO.bookList ?? [];
+
+    allBooks = bookList;
+    getCategories();
+    if(categories.isNotEmpty) {
+      selectedCategory = categories.first;
+    }
     notifyListeners();
   }
 
@@ -35,6 +46,24 @@ class ShelfDetailsBloc extends ChangeNotifier {
       bookList.sort((a, b) => a.title!.compareTo(b.title!));
     } else if (status == kSortingAuthor) {
       bookList.sort((a, b) => a.author!.compareTo(b.author!));
+    }
+    notifyListeners();
+  }
+
+  void getCategories() {
+    categories = bookList.map((book) => book.categoryName ?? "").toList();
+    if (categories.isNotEmpty) {
+      categories.insert(0, "All");
+    }
+  }
+
+  void selectCategory(String category) {
+    selectedCategory = category;
+    if (category == "All") {
+      bookList = List.from(allBooks);
+    } else {
+      bookList =
+          allBooks.where((book) => book.categoryName == category).toList();
     }
     notifyListeners();
   }

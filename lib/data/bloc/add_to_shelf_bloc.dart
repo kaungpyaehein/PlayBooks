@@ -5,13 +5,13 @@ import 'package:playbooks_flutter/data/vos/shelf_vo.dart';
 
 import 'dart:async';
 
-class ShelfBloc extends ChangeNotifier {
+class AddToShelfBloc extends ChangeNotifier {
   final PlaybooksModel _model = PlaybooksModel();
 
   List<ShelfVO> shelfList = [];
 
   StreamSubscription? _shelfStream;
-  ShelfBloc() {
+  AddToShelfBloc() {
     _shelfStream = _model.getShelvesFromDatabase().listen((shelves) {
       shelfList = shelves;
       notifyListeners();

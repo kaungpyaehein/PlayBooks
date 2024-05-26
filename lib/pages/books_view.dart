@@ -22,7 +22,15 @@ class BooksView extends StatelessWidget {
       child: CustomScrollView(
         slivers: [
           /// CategoryList to choose
-          const CategoryList(),
+          Consumer<BooksBloc>(
+            builder: (context, bloc, child) => CategoryList(
+              categoryList: bloc.categories,
+              onTapCategory: (category) {
+                bloc.selectCategory(category);
+              },
+              selectedCategory: bloc.selectedCategory,
+            ),
+          ),
 
           /// Sort bya and Change Grid or List View
           const SortingAndLayoutChangeView(),
@@ -93,43 +101,48 @@ class TabsView extends StatelessWidget {
 class CategoryList extends StatelessWidget {
   const CategoryList({
     super.key,
+    required this.categoryList,
+    required this.selectedCategory,
+    required this.onTapCategory,
   });
+
+  final List<String> categoryList;
+  final String selectedCategory;
+  final void Function(String category) onTapCategory;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BooksBloc>(builder: (context, bloc, child) {
-      return SliverToBoxAdapter(
-        child: SizedBox(
-          height: kSP60x,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kSP16x,
-            ),
-            scrollDirection: Axis.horizontal,
-            itemCount: bloc.categories.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: FilterChip(
-                  backgroundColor: kTextFieldFillColor,
-                  selected: bloc.categories[index] == bloc.selectedCategory,
-                  // showCheckmark: categories[index] == bloc.selectedCategory,
-                  checkmarkColor: kPrimaryColor,
-
-                  label: Text(
-                    bloc.categories[index],
-                    style: const TextStyle(color: kWhiteTextColor),
-                  ),
-                  onSelected: (category) {
-                    bloc.selectCategory(bloc.categories[index]);
-                  },
-                ),
-              );
-            },
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: kSP60x,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSP16x,
           ),
+          scrollDirection: Axis.horizontal,
+          itemCount: categoryList.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: FilterChip(
+                backgroundColor: kTextFieldFillColor,
+                selected: categoryList[index] == selectedCategory,
+                // showCheckmark: categories[index] == bloc.selectedCategory,
+                checkmarkColor: kPrimaryColor,
+
+                label: Text(
+                  categoryList[index],
+                  style: const TextStyle(color: kWhiteTextColor),
+                ),
+                onSelected: (_) {
+                  onTapCategory(categoryList[index]);
+                },
+              ),
+            );
+          },
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
