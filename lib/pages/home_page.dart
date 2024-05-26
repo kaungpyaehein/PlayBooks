@@ -3,7 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:playbooks_flutter/data/bloc/carrousel_bloc.dart';
 import 'package:playbooks_flutter/data/bloc/home_page_bloc.dart';
-import 'package:playbooks_flutter/data/bloc/your_books_bloc.dart';
+import 'package:playbooks_flutter/data/bloc/books_bloc.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/pages/book_details_page.dart';
@@ -191,7 +191,7 @@ class BooksHorizontalView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 280,
+      height: 250,
       child: ListView.builder(
         padding: const EdgeInsets.only(left: kSP16x),
         itemCount: categoryVO.books!.length,
@@ -199,7 +199,10 @@ class BooksHorizontalView extends StatelessWidget {
           final BookVO bookVO = categoryVO.books![index];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: kSP5x),
-            child: BookItemView(bookVO: bookVO),
+            child: BookItemView(
+              bookVO: bookVO,
+              isLargeGrid: false,
+            ),
           );
         },
         scrollDirection: Axis.horizontal,
@@ -212,13 +215,15 @@ class BookItemView extends StatelessWidget {
   const BookItemView({
     super.key,
     required this.bookVO,
+    required this.isLargeGrid,
   });
 
   final BookVO bookVO;
+  final bool isLargeGrid;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
         onTap: () {
           Navigator.push(
               context,
@@ -229,48 +234,49 @@ class BookItemView extends StatelessWidget {
               ));
         },
         child: SizedBox(
-            width: 150,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// Book Cover
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(kSP5x),
-                  child: CachedNetworkImage(
-                    fit: BoxFit.cover,
-                    imageUrl: bookVO.bookImage ?? "",
-                    height: 200,
-                    width: double.infinity,
-                  ),
+          width: isLargeGrid ? 200 : 120,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Book Cover
+              ClipRRect(
+                borderRadius: BorderRadius.circular(kSP5x),
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: bookVO.bookImage ?? "",
+                  height: isLargeGrid ? 240 : 180,
+                  width: double.infinity,
                 ),
-                const SizedBox(
-                  height: kSP10x,
-                ),
+              ),
+              const SizedBox(
+                height: kSP10x,
+              ),
 
-                /// Title
-                Text(
-                  bookVO.title ?? "",
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: const TextStyle(
-                    color: kWhiteTextColor,
-                  ),
+              /// Title
+              Text(
+                bookVO.title ?? "",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: kWhiteTextColor,
                 ),
-                const SizedBox(
-                  height: kSP5x,
-                ),
+              ),
+              const SizedBox(
+                height: kSP5x,
+              ),
 
-                // Author
-                Text(
-                  bookVO.author ?? "",
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: const TextStyle(
-                    color: kGreyTextColor,
-                  ),
-                )
-              ],
-            )));
+              // Author
+              Text(
+                bookVO.author ?? "",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: kGreyTextColor,
+                ),
+              )
+            ],
+          ),
+        ));
   }
 }
 
@@ -427,31 +433,4 @@ class CarrouselView extends StatelessWidget {
   }
 }
 
-class BooksGridView extends StatelessWidget {
-  const BooksGridView({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    // Placeholder widget, replace with actual implementation
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-      ),
-      itemCount: 20,
-      itemBuilder: (context, index) {
-        return Container(
-          color: Colors.blueGrey,
-          child: Center(
-            child: Text(
-              'Book $index',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}

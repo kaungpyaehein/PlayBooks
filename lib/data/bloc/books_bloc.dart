@@ -5,10 +5,11 @@ import 'package:playbooks_flutter/data/model/playbooks_model.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/resources/strings.dart';
 
-class YourBooksBloc extends ChangeNotifier {
+class BooksBloc extends ChangeNotifier {
   final PlaybooksModel _model = PlaybooksModel();
 
   List<BookVO> bookList = [];
+  List<BookVO> allBooks = [];
 
   List<String> categories = [];
 
@@ -18,8 +19,9 @@ class YourBooksBloc extends ChangeNotifier {
 
   late String selectedSortingStatus;
   late String selectedView;
+  late String selectedCategory;
 
-  YourBooksBloc() {
+  BooksBloc() {
     selectedSortingStatus = kSortingRecent;
     selectedView = kViewSmallGrid;
 
@@ -29,6 +31,9 @@ class YourBooksBloc extends ChangeNotifier {
       notifyListeners();
     });
     bookList = _model.getAllBooks();
+    getCategories();
+    selectedCategory = categories.first;
+    allBooks = bookList;
     notifyListeners();
   }
   void sortBookBySortingStatus(String status) {
@@ -47,6 +52,24 @@ class YourBooksBloc extends ChangeNotifier {
 
   void changeView(String newView) {
     selectedView = newView;
+    notifyListeners();
+  }
+
+  void getCategories() {
+    categories = bookList.map((book) => book.categoryName ?? "").toList();
+    if (categories.isNotEmpty) {
+      categories.insert(0, "All");
+    }
+  }
+
+  void selectCategory(String category) {
+    selectedCategory = category;
+    if (category == "All") {
+      bookList = List.from(allBooks);
+    } else {
+      bookList =
+          allBooks.where((book) => book.categoryName == category).toList();
+    }
     notifyListeners();
   }
 

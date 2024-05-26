@@ -46,8 +46,8 @@ class _CreateNewShelfPageState extends State<CreateNewShelfPage> {
                   .read<CreateNewShelfBloc>()
                   .createNewShelf(shelfNameController.text.toString());
             } else if (widget.shelfVO != null) {
-              context.read<ShelfBloc>().editShelfName(
-                  widget.shelfVO!.copyWith(shelfName: shelfNameController.text));
+              // context.read<ShelfBloc>().editShelfName(
+              //     widget.shelfVO!.copyWith(shelfName: shelfNameController.text));
             }
             Navigator.pop(context);
           },

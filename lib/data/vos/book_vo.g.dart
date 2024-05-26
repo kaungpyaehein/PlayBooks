@@ -43,13 +43,14 @@ class BookVOAdapter extends TypeAdapter<BookVO> {
       isbns: (fields[23] as List?)?.cast<IsbnVO>(),
       buyLinks: (fields[24] as List?)?.cast<BuyLinkVO>(),
       bookUri: fields[25] as String?,
+      categoryName: fields[26] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BookVO obj) {
     writer
-      ..writeByte(26)
+      ..writeByte(27)
       ..writeByte(0)
       ..write(obj.rank)
       ..writeByte(1)
@@ -101,7 +102,9 @@ class BookVOAdapter extends TypeAdapter<BookVO> {
       ..writeByte(24)
       ..write(obj.buyLinks)
       ..writeByte(25)
-      ..write(obj.bookUri);
+      ..write(obj.bookUri)
+      ..writeByte(26)
+      ..write(obj.categoryName);
   }
 
   @override

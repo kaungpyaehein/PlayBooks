@@ -5,7 +5,6 @@ import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/pages/home_page.dart';
 import 'package:playbooks_flutter/resources/colors.dart';
 import 'package:playbooks_flutter/resources/dimensions.dart';
-import 'package:playbooks_flutter/resources/strings.dart';
 import 'package:provider/provider.dart';
 
 class CategoryDetailsPage extends StatelessWidget {
@@ -35,9 +34,16 @@ class CategoryDetailsPage extends StatelessWidget {
           ),
         ),
         backgroundColor: kBackgroundColor,
-        body: const Padding(
+        body: Padding(
           padding: EdgeInsets.symmetric(horizontal: kSP16x),
-          child: BooksGridView(),
+          child: Selector<CategoryDetailsBloc, List<BookVO>>(
+            selector: (context, bloc) => bloc.bookList,
+            builder: (context, bookList, child) {
+              return BooksGridView(
+                bookList: bookList,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -47,34 +53,31 @@ class CategoryDetailsPage extends StatelessWidget {
 class BooksGridView extends StatelessWidget {
   const BooksGridView({
     super.key,
+    required this.bookList,
   });
 
+  final List<BookVO> bookList;
   @override
   Widget build(BuildContext context) {
-
-    return Selector<CategoryDetailsBloc, List<BookVO>>(
-      selector: (context, bloc) => bloc.bookList,
-      builder: (context, bookList, child) {
-        return bookList.isEmpty
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : GridView.builder(
-                itemCount: bookList.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisExtent: 260,
-                  crossAxisSpacing: kSP12x,
-                  mainAxisSpacing: kSP12x,
-                ),
-                itemBuilder: (context, index) {
-                  final BookVO bookVO = bookList[index];
-                  return BookItemView(
-                    bookVO: bookVO,
-                  );
-                },
+    return bookList.isEmpty
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : GridView.builder(
+            itemCount: bookList.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisExtent: 300,
+              crossAxisSpacing: kSP12x,
+              mainAxisSpacing: kSP12x,
+            ),
+            itemBuilder: (context, index) {
+              final BookVO bookVO = bookList[index];
+              return BookItemView(
+                bookVO: bookVO,
+                isLargeGrid: true,
               );
-      },
-    );
+            },
+          );
   }
 }

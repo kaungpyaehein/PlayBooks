@@ -31,7 +31,15 @@ class PlaybooksModel {
   }
 
   Future<List<CategoryVO>> getAllCategories() {
-    return _playbooksDataAgent.getAllCategories();
+    return _playbooksDataAgent.getAllCategories().then((categoryList) async {
+      /// add category name to every book
+      for (var category in categoryList) {
+        for (var book in category.books!) {
+          book.categoryName = category.listName;
+        }
+      }
+      return categoryList;
+    });
   }
 
   /// Get Books Stream from Local database
@@ -66,5 +74,14 @@ class PlaybooksModel {
 
   void editShelf(ShelfVO shelfVO) {
     _shelfDao.edit(shelfVO);
+  }
+
+  Future<List<BookVO>> searchBooks(String query) {
+    return _playbooksDataAgent.searchBooks(query).then((googleBookList) {
+      List<BookVO> bookVOList = googleBookList.map((googleBook) {
+        return googleBook.convertToBookVO();
+      }).toList();
+      return bookVOList;
+    });
   }
 }

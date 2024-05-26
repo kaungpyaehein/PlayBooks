@@ -31,10 +31,7 @@ class ShelfBloc extends ChangeNotifier {
       notifyListeners();
     }
   }
-  void editShelfName(ShelfVO shelfVO){
-    _model.editShelf(shelfVO);
-    notifyListeners();
-  }
+
 
   @override
   void dispose() {

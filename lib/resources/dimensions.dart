@@ -31,3 +31,4 @@ const kFontSize15x = 15.0;
 const kFontSize16x = 16.0;
 const kFontSize18x = 18.0;
 const kFontSize20x = 20.0;
+const kFontSize24x = 24.0;

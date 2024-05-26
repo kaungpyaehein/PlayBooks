@@ -113,6 +113,10 @@ class BookVO {
   @JsonKey(name: "book_uri")
   String? bookUri;
 
+  @HiveField(26)
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  String? categoryName;
+
   BookVO({
     this.rank,
     this.rankLastWeek,
@@ -140,6 +144,7 @@ class BookVO {
     this.isbns,
     this.buyLinks,
     this.bookUri,
+    this.categoryName,
   });
 
   factory BookVO.fromJson(Map<String, dynamic> json) => _$BookVOFromJson(json);

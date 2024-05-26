@@ -73,6 +73,12 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                             color: kWhiteTextColor,
                             fontWeight: FontWeight.w500),
                       ),
+                      Text(
+                        widget.bookVO.categoryName ?? "",
+                        style: const TextStyle(
+                            color: kWhiteTextColor,
+                            fontWeight: FontWeight.w500),
+                      ),
                     ],
                   ),
                 ),

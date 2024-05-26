@@ -4,13 +4,16 @@ import 'package:dio/dio.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/data/vos/error_vo.dart';
+import 'package:playbooks_flutter/data/vos/google_book/google_book_vo.dart';
 import 'package:playbooks_flutter/exception/custom_exception.dart';
+import 'package:playbooks_flutter/network/api/google_book_api.dart';
 import 'package:playbooks_flutter/network/api/playbooks_api.dart';
 import 'package:playbooks_flutter/network/api_constants.dart';
 import 'package:playbooks_flutter/network/data_agents/playbooks_data_agent.dart';
 
 class RetrofitDataAgentImpl extends PlaybooksDataAgent {
   late PlaybooksApi playbooksApi;
+  late GoogleBooksApi googleBooksApi;
 
   //setup singleton
   static RetrofitDataAgentImpl? _singleton;
@@ -23,6 +26,7 @@ class RetrofitDataAgentImpl extends PlaybooksDataAgent {
   RetrofitDataAgentImpl._internal() {
     final dio = Dio();
     playbooksApi = PlaybooksApi(dio);
+    googleBooksApi = GoogleBooksApi(dio);
   }
 
   @override
@@ -82,5 +86,17 @@ class RetrofitDataAgentImpl extends PlaybooksDataAgent {
           statusMessage: "Invalid DioException Format $e",
           success: false);
     }
+  }
+
+  @override
+  Future<List<GoogleBookVO>> searchBooks(String query) {
+    return googleBooksApi
+        .searchGoogleBooks(query)
+        .asStream()
+        .map((response) => response.items ?? [])
+        .first
+        .catchError((error) {
+      throw _createException(error);
+    });
   }
 }

@@ -5,6 +5,7 @@ import 'package:playbooks_flutter/network/api/playbooks_api.dart';
 import 'package:playbooks_flutter/network/api_constants.dart';
 import 'package:playbooks_flutter/pages/home_page.dart';
 import 'package:playbooks_flutter/pages/library_page.dart';
+import 'package:playbooks_flutter/pages/search_books_page.dart';
 import 'package:playbooks_flutter/pages/shop_page.dart';
 import 'package:playbooks_flutter/resources/colors.dart';
 import 'package:playbooks_flutter/resources/dimensions.dart';
@@ -23,20 +24,6 @@ class _IndexedPageState extends State<IndexedPage> {
     const ShopPage(),
   ];
   int selectedIndex = 0;
-
-  @override
-  void initState() {
-    // PlaybooksApi(Dio()).getAllCategoriesByDate(kApiKey).then((value) {
-    //   print(value.toString());
-    //   PlaybooksApi(Dio())
-    //       .getBooksByCategoryAndDate(
-    //           kApiKey, "current", "combined-print-and-e-book-nonfiction")
-    //       .then((thiss) {
-    //     print(thiss.toString());
-    //   });
-    // });
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +81,7 @@ class SearchFieldView extends StatelessWidget {
         style: const TextStyle(
           color: Colors.white,
         ),
+        readOnly: true,
         decoration: InputDecoration(
           isDense: true,
           hintText: "Search Play Books",
@@ -129,6 +117,11 @@ class SearchFieldView extends StatelessWidget {
             borderSide: BorderSide.none,
           ),
         ),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const SearchBookPage(),
+          ));
+        },
       ),
     );
   }

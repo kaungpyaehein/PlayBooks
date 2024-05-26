@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:playbooks_flutter/data/model/playbooks_model.dart';
 import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/data/vos/shelf_vo.dart';
 import 'package:playbooks_flutter/resources/strings.dart';
 
 class ShelfDetailsBloc extends ChangeNotifier {
+  final PlaybooksModel _model = PlaybooksModel();
   List<BookVO> bookList = [];
 
   late String selectedSortingStatus;
@@ -20,6 +22,7 @@ class ShelfDetailsBloc extends ChangeNotifier {
     selectedView = newView;
     notifyListeners();
   }
+
   void sortBookBySortingStatus(String status) {
     selectedSortingStatus = status;
     notifyListeners();
@@ -34,5 +37,9 @@ class ShelfDetailsBloc extends ChangeNotifier {
       bookList.sort((a, b) => a.author!.compareTo(b.author!));
     }
     notifyListeners();
+  }
+
+  void editShelfName(ShelfVO shelf) {
+    _model.editShelf(shelf);
   }
 }

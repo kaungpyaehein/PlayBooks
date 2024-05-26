@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:playbooks_flutter/data/model/playbooks_model.dart';
-import 'package:playbooks_flutter/data/vos/book_vo.dart';
 import 'package:playbooks_flutter/data/vos/category_vo.dart';
 import 'package:playbooks_flutter/resources/strings.dart';
 

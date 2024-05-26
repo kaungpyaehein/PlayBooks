@@ -1,10 +1,11 @@
 ///  Base Url
 const String kBaseUrl = "https://api.nytimes.com";
-const String kGoogleApiBaseUrl = "https://www.googleapis.com/books/v1/volumes";
+const String kGoogleApiBaseUrl = "https://www.googleapis.com";
 
 /// End Points
 const String kEndPointGetBooksByListNameAndDate = "/svc/books/v3/lists";
 const String kEndPointGetAllBookList = "/svc/books/v3/lists/overview.json";
+const String kEndPointSearchGoogleBooks = "/books/v1/volumes";
 
 /// Parameters
 const String kParamApiKey = "api-key";
