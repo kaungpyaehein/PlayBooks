@@ -86,7 +86,9 @@ class ShelfListView extends StatelessWidget {
                     },
                   );
                 }
-                return Center(child: Text("Empty Shelf"),);
+                return const Center(
+                  child: Text("Empty Shelf"),
+                );
               }),
           Positioned(
             bottom: kSP16x,

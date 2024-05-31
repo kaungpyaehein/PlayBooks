@@ -15,7 +15,6 @@ class BooksBloc extends ChangeNotifier {
 
   StreamSubscription? _myBooksSubscription;
 
-
   late String selectedSortingStatus;
   late String selectedView;
   late String selectedCategory;
@@ -55,7 +54,10 @@ class BooksBloc extends ChangeNotifier {
   }
 
   void getCategories() {
-    categories = bookList.map((book) => book.categoryName ?? "").toList();
+    Set<String> categorySet =
+        bookList.map((book) => book.categoryName ?? "").toSet();
+
+    categories = categorySet.toList();
     if (categories.isNotEmpty) {
       categories.insert(0, "All");
     }

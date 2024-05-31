@@ -22,7 +22,7 @@ class ShelfDetailsView extends StatelessWidget {
         ),
         body: Consumer<ShelfDetailsBloc>(
           builder: (context, bloc, child) {
-            if (bloc.bookList.isEmpty ) {
+            if (bloc.bookList.isEmpty) {
               return const Center(
                 child: Text("Empty Shelf"),
               );
@@ -61,18 +61,22 @@ class ShelfDetailsView extends StatelessWidget {
                         case kViewList:
                           return BooksListView(
                             bookList: bloc.bookList,
+                            longPressEnabled: false,
                           );
                         case kViewLargeGrid:
                           return BooksLargeGridView(
                             bookList: bloc.bookList,
+                            longPressEnabled: false,
                           );
                         case kViewSmallGrid:
                           return BooksSmallGridView(
                             bookList: bloc.bookList,
+                            longPressEnabled: false,
                           );
                         default:
                           return BooksListView(
                             bookList: bloc.bookList,
+                            longPressEnabled: false,
                           );
                       }
                     },

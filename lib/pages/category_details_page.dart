@@ -61,7 +61,7 @@ class BooksGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return bookList.isEmpty
         ? const Center(
-            child: CircularProgressIndicator(),
+            child: SizedBox.shrink(),
           )
         : GridView.builder(
             itemCount: bookList.length,

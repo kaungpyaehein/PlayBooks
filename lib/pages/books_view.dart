@@ -45,18 +45,22 @@ class BooksView extends StatelessWidget {
                 if (bloc.selectedView == kViewList) {
                   return BooksListView(
                     bookList: bloc.bookList,
+                    longPressEnabled: true,
                   );
                 } else if (bloc.selectedView == kViewLargeGrid) {
                   return BooksLargeGridView(
                     bookList: bloc.bookList,
+                    longPressEnabled: true,
                   );
                 } else if (bloc.selectedView == kViewSmallGrid) {
                   return BooksSmallGridView(
                     bookList: bloc.bookList,
+                    longPressEnabled: true,
                   );
                 }
                 return BooksListView(
                   bookList: bloc.bookList,
+                  longPressEnabled: true,
                 );
               },
             ),
@@ -147,9 +151,11 @@ class CategoryList extends StatelessWidget {
 }
 
 class BooksListView extends StatelessWidget {
-  const BooksListView({super.key, required this.bookList});
+  const BooksListView(
+      {super.key, required this.bookList, required this.longPressEnabled});
 
   final List<BookVO> bookList;
+  final bool longPressEnabled;
   @override
   Widget build(BuildContext context) {
     return SliverList(
@@ -161,7 +167,9 @@ class BooksListView extends StatelessWidget {
           builder: (context) => BookDetailsPage(bookVO: bookVO),
         )),
         onLongPress: () {
-          showAddToShelfBottomShelf(context, bookVO);
+          if (longPressEnabled) {
+            showAddToShelfBottomShelf(context, bookVO);
+          }
         },
         child: ListTile(
           contentPadding: EdgeInsets.zero,
@@ -301,8 +309,10 @@ class BooksLargeGridView extends StatelessWidget {
   const BooksLargeGridView({
     super.key,
     required this.bookList,
+    required this.longPressEnabled,
   });
   final List<BookVO> bookList;
+  final bool longPressEnabled;
   @override
   Widget build(BuildContext context) {
     return SliverGrid(
@@ -311,7 +321,9 @@ class BooksLargeGridView extends StatelessWidget {
         (context, index) {
           return InkWell(
             onLongPress: () {
-              showAddToShelfBottomShelf(context, bookList[index]);
+              if (longPressEnabled) {
+                showAddToShelfBottomShelf(context, bookList[index]);
+              }
             },
             child: BookItemView(
               bookVO: bookList[index],
@@ -334,8 +346,10 @@ class BooksSmallGridView extends StatelessWidget {
   const BooksSmallGridView({
     super.key,
     required this.bookList,
+    required this.longPressEnabled,
   });
   final List<BookVO> bookList;
+  final bool longPressEnabled;
   @override
   Widget build(BuildContext context) {
     return SliverGrid(
@@ -344,7 +358,9 @@ class BooksSmallGridView extends StatelessWidget {
         (context, index) {
           return InkWell(
             onLongPress: () {
-              showAddToShelfBottomShelf(context, bookList[index]);
+              if (longPressEnabled) {
+                showAddToShelfBottomShelf(context, bookList[index]);
+              }
             },
             child: BookItemView(
               bookVO: bookList[index],

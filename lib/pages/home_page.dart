@@ -393,7 +393,7 @@ class CarrouselView extends StatelessWidget {
                   aspectRatio: 16 / 9,
                   viewportFraction: 0.5,
                   initialPage: 0,
-                  enableInfiniteScroll: true,
+                  enableInfiniteScroll: bookList.length > 2,
                   reverse: false,
                   autoPlayCurve: Curves.fastOutSlowIn,
                   enlargeCenterPage: true,
@@ -432,5 +432,3 @@ class CarrouselView extends StatelessWidget {
     );
   }
 }
-
-

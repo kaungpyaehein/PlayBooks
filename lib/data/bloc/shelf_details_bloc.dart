@@ -23,7 +23,7 @@ class ShelfDetailsBloc extends ChangeNotifier {
 
     allBooks = bookList;
     getCategories();
-    if(categories.isNotEmpty) {
+    if (categories.isNotEmpty) {
       selectedCategory = categories.first;
     }
     notifyListeners();
